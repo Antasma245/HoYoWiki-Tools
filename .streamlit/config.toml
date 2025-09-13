@@ -1,0 +1,14 @@
+[client]
+showErrorDetails = "type"
+
+[runner]
+magicEnabled = false
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+base = "dark"
+primaryColor = "#657EF8"
+backgroundColor = "#323947"
+secondaryBackgroundColor = "#3B4354"
