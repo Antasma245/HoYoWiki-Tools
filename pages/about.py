@@ -10,6 +10,8 @@ Should you have any question or think something is not working correctly, feel f
 
 **Project Maintainer:** Antasma245
 
+**Contributors:** A_72_, rii
+
 **GitHub repository:** https://github.com/Antasma245/HoYoWiki-Tools
             
 """)
