@@ -30,17 +30,19 @@ def classify_dialogue(dialogue_df: pd.DataFrame) -> None:
     for idx, row in dialogue_df.iterrows():
         row_type = None
 
-        if row["header"] == "Quest Description":
+        if "Desc" in row["header"]:
             row_type = "description"
 
-            variable_text.append(row["header"])
-        elif row["header"] == "Quest Objective":
+            dialogue_df.at[idx, "header"] = "Quest Description"
+            variable_text.append("Quest Description")
+        elif "Objective" in row["header"] or row["header"].isdigit():
             row_type = "objective"
 
-            variable_text.append(row["header"])
-        elif row["header"] == "(Missing localization)":
+            dialogue_df.at[idx, "header"] = "Quest Objective"
+            variable_text.append("Quest Objective")
+        elif "Missing" in row["header"]:
             row_type = "missing"
-        elif "Additional Dialogue" in row["header"] or "Alternative Dialogue" in row["header"] or "Optional Dialogue" in row["header"]:
+        elif "Additional" in row["header"] or "Alternative" in row["header"] or "Optional" in row["header"]:
             row_type = "addopt"
 
             variable_text.append(row["header"])
@@ -127,6 +129,7 @@ def format_dialogue(classified_dialogue_df: pd.DataFrame) -> None:
 
     for idx, row in classified_dialogue_df.iterrows():
         last_row_type = classified_dialogue_df.at[idx - 1, "type"] if idx > 0 else None
+        next_row_type = classified_dialogue_df.at[idx + 1, "type"] if idx < (len(classified_dialogue_df) - 1) else None
 
         match row["type"]:
             case "description":
@@ -227,7 +230,6 @@ def format_dialogue(classified_dialogue_df: pd.DataFrame) -> None:
                 <p></p>
                 """ % row["text"]
             case "blank":
-                next_row_type = classified_dialogue_df.at[idx + 1, "type"]
                 if opened_tags and next_row_type != "choice_flag":
                     match opened_tags[-1]:
                         case "addopt" | "choice_branch":
