@@ -50,6 +50,11 @@ def classify_dialogue(dialogue_df: pd.DataFrame) -> None:
             row_type = "choice_flag"
         elif re.search(r"\d+\.\s+", row["header"]):
             row_type = "choice_branch"
+            
+            choice_speaker = re.search(r"(?:\d+\.\s+)+(.+)", row["header"])
+            
+            if choice_speaker is not None:
+                variable_text.append(choice_speaker[1])
         elif "," in row["header"]:
             row_type = "location"
 
