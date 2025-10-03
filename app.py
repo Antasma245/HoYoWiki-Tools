@@ -8,6 +8,12 @@ home = st.Page(
     default = True
 )
 
+pgc_creator = st.Page(
+    "pages/pgc_creator.py",
+    title = "PGC Creator",
+    icon = ":material/table_edit:"
+)
+
 quest_formatter = st.Page(
     "pages/quest_formatter.py",
     title = "Quest Formatter",
@@ -23,7 +29,7 @@ about = st.Page(
 pg = st.navigation(
     {
         "Home": [home],
-        "Tools": [quest_formatter],
+        "Tools": [pgc_creator, quest_formatter],
         "Information": [about]
     }
 )
