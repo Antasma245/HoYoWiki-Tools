@@ -116,15 +116,15 @@ def get_variable_text_translation(classified_dialogue_df: pd.DataFrame, variable
     text_to_translate.sort(key = lambda og_text: len(og_text), reverse = True)
     
     if st.button("Submit", key = "submit_translated_text_button"):
-        for og_text in text_to_translate:
-            translated_text = st.session_state[og_text]
+        with st.spinner("Please wait...", show_time = True):
+            for og_text in text_to_translate:
+                translated_text = st.session_state[og_text]
 
-            classified_dialogue_df = classified_dialogue_df.map(lambda text: text.replace(og_text, translated_text))
-        
-        format_dialogue(classified_dialogue_df)
+                classified_dialogue_df = classified_dialogue_df.map(lambda text: text.replace(og_text, translated_text))
+            
+            format_dialogue(classified_dialogue_df)
 
-        st.rerun()
-
+            st.rerun()
 
 
 def format_dialogue(classified_dialogue_df: pd.DataFrame) -> None:
@@ -272,7 +272,7 @@ if "quest_formatter_html" not in st.session_state:
 st.title("Quest Formatter")
 
 st.markdown("""
-Takes text data from a localization sheet made by the Quest Team and formats it to be pasted directly into the WET.
+Takes text data from a localization sheet made by the Quest Team and formats it so it is ready to be pasted directly into the WET.
 
 Tested for: :green-badge[:material/check: Genshin Impact]
 """)
@@ -319,12 +319,14 @@ with objective_tab:
     objective_df = st.data_editor(default_table_df, column_config = default_table_config, num_rows = "dynamic", key = "objective_data")
 
     if st.button("Format", type = "primary", key = "format_objective_button"):
+        objective_df.fillna("", inplace = True)
         format_objective(objective_df)
 
 with dialogue_tab:
     dialogue_df = st.data_editor(default_table_df, column_config = default_table_config, num_rows = "dynamic", key = "dialogue_data")
 
     if st.button("Format", type = "primary", key = "format_dialogue_button"):
+        dialogue_df.fillna("", inplace = True)
         classify_dialogue(dialogue_df)
 
 if st.session_state["quest_formatter_html"] is not None:
