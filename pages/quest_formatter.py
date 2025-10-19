@@ -129,8 +129,9 @@ def get_variable_text_translation(classified_dialogue_df: pd.DataFrame, variable
 
 def format_dialogue(classified_dialogue_df: pd.DataFrame) -> None:
     html_data = ""
-
     opened_tags = []
+
+    language_preset = "EN" if st.session_state["quest_formatter_preset"] is None else st.session_state["quest_formatter_preset"]
 
     for idx, row in classified_dialogue_df.iterrows():
         last_row_type = classified_dialogue_df.at[idx - 1, "type"] if idx > 0 else None
@@ -138,32 +139,57 @@ def format_dialogue(classified_dialogue_df: pd.DataFrame) -> None:
 
         match row["type"]:
             case "description":
-                html_data += """
-                <table>
-                    <tbody>
-                        <tr>
-                            <td colspan="1" rowspan="1">
-                                <p>
-                                    <strong><span style="color: rgb(255, 255, 255);">%s: </span></strong>
-                                    <span style="color: rgb(255, 255, 255);">%s</span>
-                                </p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                """ % (row["header"], row["text"])
+                match language_preset:
+                    case "EN":
+                        html_data += """
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td colspan="1" rowspan="1">
+                                        <p><span style="color: rgb(255, 255, 255);"><strong>%s: </strong> %s</span></p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        """ % (row["header"], row["text"])
+                    case "RU":
+                        html_data += """
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td colspan="1" rowspan="1">
+                                        <p><span style="color: rgb(255, 255, 255);"><strong>%s: </strong></span>%s</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        """ % (row["header"], row["text"])
             case "objective":
-                html_data += """
-                <table>
-                    <tbody>
-                        <tr>
-                            <td colspan="1" rowspan="1">
-                                <p><strong>%s: </strong>%s</p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                """ % (row["header"], row["text"])
+                match language_preset:
+                    case "EN":
+                        html_data += """
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td colspan="1" rowspan="1">
+                                        <p><strong>%s: </strong>%s</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        """ % (row["header"], row["text"])
+                    case "RU":
+                        html_data += """
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td colspan="1" rowspan="1">
+                                        <p><span style="color: rgb(255, 255, 255);"><strong>%s: </strong>%s</span></p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        """ % (row["header"], row["text"])
             case "missing":
                 continue
             case "addopt":
@@ -195,26 +221,47 @@ def format_dialogue(classified_dialogue_df: pd.DataFrame) -> None:
                     
                 row["header"] = re.sub(r"\d+\.\s+", "", row["header"])
 
-                html_data += """
-                <table>
-                    <tbody>
-                        <tr>
-                            <td colspan="1" rowspan="1">
-                                <p><span style="color: rgb(255, 255, 255);">%s: %s</span></p>
-                """ % (row["header"], row["text"])
+                match language_preset:
+                    case "EN":
+                        html_data += """
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td colspan="1" rowspan="1">
+                                        <p><span style="color: rgb(255, 255, 255);">%s: %s</span></p>
+                        """ % (row["header"], row["text"])
+                    case "RU":
+                        html_data += """
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td colspan="1" rowspan="1">
+                                        <p><span style="color: rgb(255, 255, 255);"><strong>%s: </strong>%s</span></p>
+                        """ % (row["header"], row["text"])
 
                 opened_tags.append("choice_branch")
             case "location":
-                html_data += """
-                <p>
-                    <strong><span style="color: rgb(236, 229, 216);">%s</span></strong>
-                </p>
-                """ % row["header"]
+                match language_preset:
+                    case "EN":
+                        html_data += """
+                        <p><span style="color: rgb(236, 229, 216);"><strong>%s</strong></span></p>
+                        """ % row["header"]
+                    case "RU":
+                        html_data += """
+                        <p><span style="color: rgb(255, 255, 255);"><strong>%s</strong></span></p>
+                        """ % row["header"]
             case "dialogue":
                 if last_row_type == "objective":
                     html_data += "<p></p>"
                 
-                html_data += """<p><span style="color: rgb(255, 255, 255);">%s: </span>%s</p>""" % (row["header"], row["text"])
+                match language_preset:
+                    case "EN":
+                        html_data += """<p><span style="color: rgb(255, 255, 255);">%s: </span>%s</p>""" % (row["header"], row["text"])
+                    case "RU":
+                        html_data += """
+                        <p><span style="color: rgb(255, 255, 255);"><strong>%s: </strong></span></p>
+                        <p>%s</p>
+                        """ % (row["header"], row["text"])
             case "sub_mission":
                 if last_row_type == "objective":
                     html_data += "<p></p>"
@@ -304,6 +351,13 @@ with st.expander("How to Use"):
     """)
 
 st.divider()
+
+st.segmented_control(
+    "Language Format Preset:",
+    ["EN", "RU"],
+    default = "EN",
+    key = "quest_formatter_preset"
+)
 
 default_table_data = {"header": [""], "text": [""]}
 default_table_df = pd.DataFrame(default_table_data)
