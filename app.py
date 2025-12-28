@@ -20,6 +20,12 @@ quest_formatter = st.Page(
     icon = ":material/chat_paste_go:"
 )
 
+wet_colorizer = st.Page(
+    "pages/wet_colorizer.py",
+    title = "WET Colorizer",
+    icon = ":material/format_color_fill:"
+)
+
 about = st.Page(
     "pages/about.py",
     title = "About this app",
@@ -29,7 +35,7 @@ about = st.Page(
 pg = st.navigation(
     {
         "Home": [home],
-        "Tools": [pgc_creator, quest_formatter],
+        "Tools": [pgc_creator, quest_formatter, wet_colorizer],
         "Information": [about]
     }
 )
