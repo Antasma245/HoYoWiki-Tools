@@ -1,6 +1,12 @@
 import streamlit as st
 
 
+st.logo(
+    "assets/hoyowiki_tools_banner.png",
+    size = "large",
+    icon_image = "assets/hoyowiki_tools_logo.png"    
+)
+
 home = st.Page(
     "pages/home.py",
     title = "HoYoWiki-Tools",
