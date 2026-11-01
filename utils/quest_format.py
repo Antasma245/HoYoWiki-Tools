@@ -578,6 +578,7 @@ def format_dialogue(
     is_korean = target_language == "KR"
     kr_meta_table_open = False
     jp_choice_open = False
+    jp_choice_closed = False
 
     html_data = ""
     opened_tags: list[str] = []
@@ -617,6 +618,21 @@ def format_dialogue(
         if lookahead_index < len(classified_dialogue_df):
             next_content_type = classified_dialogue_df.at[lookahead_index, "type"]
 
+        previous_content_type = last_row_type
+        lookbehind_index = row_index - 1
+
+        while (
+            lookbehind_index >= 0
+            and classified_dialogue_df.at[lookbehind_index, "type"] == "blank"
+        ):
+            lookbehind_index -= 1
+
+        if lookbehind_index >= 0:
+            previous_content_type = classified_dialogue_df.at[
+                lookbehind_index,
+                "type",
+            ]
+
         next_note_target_type = next_content_type
         note_lookahead_index = row_index + 1
 
@@ -629,6 +645,8 @@ def format_dialogue(
 
         if note_lookahead_index < len(classified_dialogue_df):
             next_note_target_type = classified_dialogue_df.at[note_lookahead_index, "type"]
+
+        jp_choice_closed = False
 
         if (
             is_korean
@@ -679,6 +697,7 @@ def format_dialogue(
                 opened_tags.remove("choice_branch")
 
             jp_choice_open = False
+            jp_choice_closed = True
 
         text = prepare_text(str(row["text"]), target_language, gender_mode)
         header = _replace_color_tags(str(row["header"]))
@@ -1144,6 +1163,13 @@ def format_dialogue(
                 if is_korean and (
                     next_content_type in {"choice_branch", "choice_flag"}
                     or kr_meta_table_open
+                ):
+                    add_spacing = False
+
+                if is_japanese and (
+                    next_content_type in {"choice_branch", "choice_flag"}
+                    or previous_content_type == "choice_branch"
+                    or jp_choice_closed
                 ):
                     add_spacing = False
 

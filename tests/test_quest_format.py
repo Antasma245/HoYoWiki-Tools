@@ -1290,6 +1290,67 @@ class FormattingTests(unittest.TestCase):
 
         self.assertNotIn("<p></p>", table)
 
+    def test_japanese_choice_has_no_blank_lines_around_it(self) -> None:
+        result = quest_format.classify_dialogue(
+            pd.DataFrame(
+                {
+                    "header": [
+                        "Anastasya",
+                        "",
+                        "Choice",
+                        "1. Traveler",
+                        "",
+                        "Anastasya",
+                    ],
+                    "text": ["Intro", "", "", "Option", "", "Outro"],
+                }
+            ),
+            target_language = "JP",
+            prompt_variables = False,
+            prompt_headers = False,
+        )
+
+        output = quest_format.format_dialogue(
+            result.df,
+            "RU",
+            target_language = "JP",
+        )
+
+        compact = "".join(output.split())
+
+        self.assertNotIn("</p><p></p><table>", compact)
+        self.assertNotIn("</table><p></p><p>", compact)
+
+    def test_japanese_choice_with_response_has_no_blank_after(self) -> None:
+        result = quest_format.classify_dialogue(
+            pd.DataFrame(
+                {
+                    "header": [
+                        "Choice",
+                        "1. Traveler",
+                        "Paimon",
+                        "",
+                        "Paimon",
+                    ],
+                    "text": ["", "Option", "Response", "", "Next"],
+                }
+            ),
+            target_language = "JP",
+            prompt_variables = False,
+            prompt_headers = False,
+        )
+
+        output = quest_format.format_dialogue(
+            result.df,
+            "RU",
+            target_language = "JP",
+        )
+
+        compact = "".join(output.split())
+
+        self.assertNotIn("</table><p></p>", compact)
+        self.assertIn("Next", output)
+
     def test_japanese_traveler_dialogue_uses_its_own_box(self) -> None:
         result = quest_format.classify_dialogue(
             pd.DataFrame(
