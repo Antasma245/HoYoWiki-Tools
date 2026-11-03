@@ -338,8 +338,9 @@ def classify_dialogue(
         elif row_type == "addopt":
             normalized_header = normalize_name(raw_header)
             df.at[row_index, "header"] = normalized_header
+            lookup_header = _strip_condition_parens(normalized_header)
             localized_optional = _localize_talk_to_header(
-                normalized_header,
+                lookup_header,
                 normalized_field_label_map,
                 normalized_speaker_map,
                 target_language,
@@ -347,7 +348,7 @@ def classify_dialogue(
 
             if not localized_optional:
                 localized_optional = _localize_header_prefix(
-                    normalized_header, normalized_field_label_map
+                    lookup_header, normalized_field_label_map
                 )
 
             if localized_optional:
@@ -384,7 +385,9 @@ def classify_dialogue(
                     localized_location or normalized_header,
                 )
         elif row_type == "sub_mission":
-            normalized_header = normalize_name(raw_header)
+            normalized_header = _normalize_condition_header(
+                normalize_name(raw_header)
+            )
             df.at[row_index, "header"] = normalized_header
             localized_condition = _localize_material_condition(
                 normalized_header,
@@ -1595,6 +1598,31 @@ def _use_fullwidth_colon(text: str) -> str:
     """Replace the first colon and its trailing spaces with a full-width colon."""
 
     return re.sub(r"[:：]\s*", "：", text, count=1)
+
+
+def _strip_condition_parens(header: str) -> str:
+    """Drop a surrounding pair of parentheses, including malformed ones."""
+
+    text = header.strip()
+
+    if text.startswith("("):
+        text = text[1:].lstrip()
+
+    if text.endswith(")"):
+        text = text[:-1].rstrip()
+
+    return text
+
+
+def _normalize_condition_header(header: str) -> str:
+    """Wrap condition headers that have mismatched parentheses."""
+
+    text = header.strip()
+
+    if not text or not (text.startswith("(") or text.endswith(")")):
+        return text
+
+    return "(%s)" % _strip_condition_parens(text)
 
 
 def _localize_talk_to_header(

@@ -1627,6 +1627,49 @@ class FormattingTests(unittest.TestCase):
             "可选对话：与安娜丝塔夏对话",
         )
 
+    def test_parenthesized_optional_header_uses_the_talk_to_template(self) -> None:
+        result = quest_format.classify_dialogue(
+            pd.DataFrame(
+                {
+                    "header": ["(Optional Dialogue: Talk to Anastasya)"],
+                    "text": [""],
+                }
+            ),
+            field_label_map = {
+                "Optional Dialogue: Talk to": (
+                    "Дополнительный диалог: Поговорите с"
+                ),
+            },
+            speaker_map = {"Anastasya": "Анастасия"},
+            target_language = "RU",
+            prompt_headers = True,
+        )
+
+        self.assertEqual(
+            result.defaults["optional"][
+                "(Optional Dialogue: Talk to Anastasya)"
+            ],
+            "Дополнительный диалог: Поговорите с Anastasya",
+        )
+
+    def test_malformed_condition_headers_are_wrapped(self) -> None:
+        cases = (
+            "Complete the challenge)",
+            "(Complete the challenge",
+            "(Complete the challenge)",
+        )
+
+        for header in cases:
+            result = quest_format.classify_dialogue(
+                pd.DataFrame({"header": [header], "text": [""]}),
+                prompt_variables = False,
+                prompt_headers = False,
+            )
+
+            output = quest_format.format_dialogue(result.df, "EN")
+
+            self.assertIn("<em>(Complete the challenge)</em>", output)
+
     def test_talk_to_header_keeps_the_source_name_for_russian(self) -> None:
         result = quest_format.classify_dialogue(
             pd.DataFrame(
