@@ -9,20 +9,39 @@ workbook so every sheet (``Locations``, ``Names``, ``Special Words``,
 from __future__ import annotations
 
 import io
+import os
 from dataclasses import dataclass, field
 
 import pandas as pd
 
-KNOWLEDGE_BASE_SHEET_ID = "1OoUh_oioZ66JeVgzSbWagDL1bYEf3uVSyh_OHjxD7Xs"
+DEFAULT_KNOWLEDGE_BASE_SHEET_ID = "1REDNpTKJ-36RXtkmGvNf_2RtDCbFvjNg"
 
-KNOWLEDGE_BASE_EXPORT_URL = (
-    "https://docs.google.com/spreadsheets/d/%s/export?format=xlsx"
-    % KNOWLEDGE_BASE_SHEET_ID
-)
+KNOWLEDGE_BASE_SHEET_ID_ENV = "KNOWLEDGE_BASE_SHEET_ID"
 
-KNOWLEDGE_BASE_VIEW_URL = (
-    "https://docs.google.com/spreadsheets/d/%s" % KNOWLEDGE_BASE_SHEET_ID
-)
+
+def knowledge_base_sheet_id() -> str:
+    """Return the configured sheet ID, falling back to the default sheet."""
+
+    return (
+        os.environ.get(KNOWLEDGE_BASE_SHEET_ID_ENV, "").strip()
+        or DEFAULT_KNOWLEDGE_BASE_SHEET_ID
+    )
+
+
+def knowledge_base_export_url(sheet_id: str | None = None) -> str:
+    """Return the XLSX export URL for the knowledge base workbook."""
+
+    return "https://docs.google.com/spreadsheets/d/%s/export?format=xlsx" % (
+        sheet_id or knowledge_base_sheet_id()
+    )
+
+
+def knowledge_base_view_url(sheet_id: str | None = None) -> str:
+    """Return the human-facing URL of the knowledge base workbook."""
+
+    return "https://docs.google.com/spreadsheets/d/%s" % (
+        sheet_id or knowledge_base_sheet_id()
+    )
 
 SECTION_LOCATIONS = "Locations"
 SECTION_NAMES = "Names"

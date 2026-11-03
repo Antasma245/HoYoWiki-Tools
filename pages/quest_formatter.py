@@ -11,9 +11,10 @@ import streamlit.components.v1 as components
 from utils import quest_format
 from utils.copy_component import copy_formatted_text
 from utils.knowledge_base import (
-    KNOWLEDGE_BASE_EXPORT_URL,
-    KNOWLEDGE_BASE_VIEW_URL,
     KnowledgeBase,
+    knowledge_base_export_url,
+    knowledge_base_sheet_id,
+    knowledge_base_view_url,
     parse_knowledge_base,
 )
 from utils.quest_data import (
@@ -172,11 +173,27 @@ def _render_collapse_speakers(language: str) -> bool:
     )
 
 
+def _knowledge_base_sheet_id() -> str:
+    """Resolve the sheet ID from Streamlit secrets, the environment or default."""
+
+    try:
+        secret = st.secrets.get("KNOWLEDGE_BASE_SHEET_ID", "")
+    except Exception:
+        secret = ""
+
+    if isinstance(secret, str) and secret.strip():
+        return secret.strip()
+
+    return knowledge_base_sheet_id()
+
+
 @st.cache_data(ttl = 3600, show_spinner = "Loading knowledge base…")
-def _fetch_knowledge_base() -> tuple[KnowledgeBase | None, str | None]:
+def _fetch_knowledge_base(
+    export_url: str,
+) -> tuple[KnowledgeBase | None, str | None]:
     try:
         with urllib.request.urlopen(
-            KNOWLEDGE_BASE_EXPORT_URL,
+            export_url,
             timeout = 25,
         ) as response:
             payload = response.read()
@@ -203,7 +220,10 @@ def _render_knowledge_base_control() -> KnowledgeBase | None:
     if not enabled:
         return None
 
-    knowledge_base, error = _fetch_knowledge_base()
+    sheet_id = _knowledge_base_sheet_id()
+    knowledge_base, error = _fetch_knowledge_base(
+        knowledge_base_export_url(sheet_id)
+    )
 
     if knowledge_base is None:
         st.warning(
@@ -234,7 +254,7 @@ def _render_knowledge_base_control() -> KnowledgeBase | None:
                 format(counts["special_words"], ","),
                 format(counts["quests"], ","),
                 format(counts["materials"], ","),
-                KNOWLEDGE_BASE_VIEW_URL,
+                knowledge_base_view_url(sheet_id),
             )
         )
 

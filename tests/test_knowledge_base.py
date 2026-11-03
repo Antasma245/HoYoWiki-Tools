@@ -1,5 +1,7 @@
 import io
+import os
 import unittest
+from unittest import mock
 
 import pandas as pd
 
@@ -122,6 +124,44 @@ class KnowledgeBaseTests(unittest.TestCase):
                 "quests": 2,
                 "materials": 2,
             },
+        )
+
+    def test_default_sheet_id(self) -> None:
+        with mock.patch.dict(os.environ, {}, clear = False):
+            os.environ.pop(knowledge_base.KNOWLEDGE_BASE_SHEET_ID_ENV, None)
+
+            self.assertEqual(
+                knowledge_base.knowledge_base_sheet_id(),
+                "1REDNpTKJ-36RXtkmGvNf_2RtDCbFvjNg",
+            )
+
+    def test_sheet_id_can_be_overridden_by_environment(self) -> None:
+        with mock.patch.dict(
+            os.environ,
+            {knowledge_base.KNOWLEDGE_BASE_SHEET_ID_ENV: "custom-sheet-id"},
+        ):
+            self.assertEqual(
+                knowledge_base.knowledge_base_sheet_id(),
+                "custom-sheet-id",
+            )
+            self.assertIn(
+                "/custom-sheet-id/",
+                knowledge_base.knowledge_base_export_url(),
+            )
+            self.assertTrue(
+                knowledge_base.knowledge_base_view_url().endswith(
+                    "/custom-sheet-id"
+                )
+            )
+
+    def test_urls_accept_an_explicit_sheet_id(self) -> None:
+        self.assertEqual(
+            knowledge_base.knowledge_base_export_url("abc"),
+            "https://docs.google.com/spreadsheets/d/abc/export?format=xlsx",
+        )
+        self.assertEqual(
+            knowledge_base.knowledge_base_view_url("abc"),
+            "https://docs.google.com/spreadsheets/d/abc",
         )
 
 
