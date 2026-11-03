@@ -8,6 +8,32 @@ import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
+import utils.copy_component
+import utils.knowledge_base
+import utils.quest_data
+import utils.quest_format
+
+# Streamlit Cloud can hot-reload this page while keeping older ``utils``
+# modules in memory. Reload any module whose source file is newer.
+for _module in (
+    utils.quest_data,
+    utils.knowledge_base,
+    utils.copy_component,
+    utils.quest_format,
+):
+    _module_path = getattr(_module, "__file__", None)
+
+    if not _module_path:
+        continue
+
+    try:
+        _module_mtime = os.path.getmtime(_module_path)
+    except OSError:
+        continue
+
+    if getattr(_module, "_LOADED_AT", 0) < _module_mtime:
+        importlib.reload(_module)
+
 from utils import quest_format
 from utils.copy_component import copy_formatted_text
 from utils.knowledge_base import (
@@ -24,13 +50,6 @@ from utils.quest_data import (
     normalize_name,
     parse_quest_file,
 )
-
-# Streamlit Cloud can hot-reload this page while keeping an older
-# ``utils.quest_format`` in memory. Reload it when the source file is newer.
-if getattr(quest_format, "_LOADED_AT", 0) < os.path.getmtime(
-    quest_format.__file__
-):
-    quest_format = importlib.reload(quest_format)
 
 
 PENDING_KEY = "quest_formatter_pending"

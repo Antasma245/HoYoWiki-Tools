@@ -18,12 +18,16 @@ from __future__ import annotations
 
 import io
 import re
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
 import openpyxl
 import pandas as pd
 
+
+# Used by the page to detect a module left behind by a hot reload.
+_LOADED_AT = time.time()
 
 LANGUAGE_LABELS = {
     "EN": "English",
