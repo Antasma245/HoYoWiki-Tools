@@ -13,7 +13,7 @@ A collection of small applications to streamline the work of HoYoWiki collaborat
 ### Currently available modules
 
 * **PGC Creator:** Creates and fills in a PGC spreadsheet in batch from a template for it to be loaded and pushed into the WET.
-* **Quest Formatter:** Takes text data from a localization sheet made by the Quest Team and formats it so it is ready to be pasted directly into the WET.
+* **Quest Formatter:** Takes text data from a localization sheet made by the Quest Team and formats it so it is ready to be pasted directly into the WET. Supports pasting the text columns or importing the original `.xlsx` / `.csv` data file, including automatic localization of speaker names, locations, field labels, quest titles and materials from the file's `Translation` section or the shared [knowledge base spreadsheet](https://docs.google.com/spreadsheets/d/1REDNpTKJ-36RXtkmGvNf_2RtDCbFvjNg). The sheet ID can be overridden with the `KNOWLEDGE_BASE_SHEET_ID` environment variable (or a Streamlit secret of the same name).
 
 </details>
 
@@ -94,5 +94,19 @@ python -m streamlit run app.py
 ## Developer notes
 
 This application is meant to be used by HoYoWiki collaborators, but is by no means officially affiliated or endorsed by HoYoverse.
+
+### Deploying to Streamlit Community Cloud
+
+Streamlit Community Cloud currently defaults to Python 3.14. The pinned `pandas` and `pyarrow` versions in `requirements.txt` do not provide Python 3.14 wheels, so dependency installation fails while trying to build `pyarrow` from source.
+
+When creating or reconfiguring the app, select **Python 3.12** (or **3.13**) under **Advanced settings**. Community Cloud does not honor `runtime.txt` or `.python-version` for this; the Python version must be set in the app's dashboard settings. If an app is already stuck on Python 3.14, delete and redeploy it with the correct version selected.
+
+### Running the tests
+
+With the virtual environment from the installation steps activated, run:
+
+```sh
+python -m unittest discover -s tests
+```
 
 This program uses the Streamlit library, which is open sourced under the Apache 2.0 license. A copy of the aforementioned license document can be found in the [`appendix`](appendix) folder of the application or on Streamlit's [GitHub page](https://github.com/streamlit/streamlit?tab=Apache-2.0-1-ov-file).
